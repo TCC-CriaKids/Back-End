@@ -8,13 +8,13 @@ import random
 router = APIRouter()
 
 # ROTA QUE RETORNA TODAS AS ATIVIDADES
-@router.get("/")
+@router.get("/todas-atividades")
 async def listar_atividades():
     atividades = list_serial(colecao_atividades.find())
     return atividades
 
 # ROTA QUE RETORNA ATIVIDADE PELO ID
-@router.get("/{id}")
+@router.get("/buscar-atividade")
 async def buscar_atividade(id: str):
     atividade = colecao_atividades.find_one({"_id": ObjectId(id)})
     if not atividade:
@@ -22,7 +22,7 @@ async def buscar_atividade(id: str):
     return individual_serial(atividade)
 
 # ROTA QUE DELETA UMA ATIVIDADE PELO ID
-@router.delete("/{id}")
+@router.delete("/deleta-atividade")
 async def deleta_atividade(id: str):
     resultado = colecao_atividades.find_one_and_delete({"_id": ObjectId(id)})
     if not resultado:
@@ -47,7 +47,7 @@ palavras = [
 tipos_validos = {"primeira_letra", "ultima_letra", "quantidade_letras"}
 
 # ROTA QUE CRIA A ATIVIDADE (ESCOLHE A PALAVRA ALEATORIAMENTE)
-@router.post("/")
+@router.post("/cria-atividade")
 async def criar_atividade(atividade: Atividade):
     if atividade.tipo not in tipos_validos:
         raise HTTPException(status_code=400, detail="Tipo de atividade inválido")

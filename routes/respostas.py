@@ -7,13 +7,13 @@ from bson import ObjectId
 router = APIRouter()
 
 # ROTA QUE RETORNA TODAS AS RESPOSTAS
-@router.get("/")
+@router.get("/todas-respostas")
 async def listar_respostas():
     respostas = list_serial(colecao_respostas.find())
     return respostas
 
 # ROTA QUE RETORNA RESPOSTA PELO ID
-@router.get("/{id}")
+@router.get("/buscar-resposta")
 async def buscar_resposta(id: str):
     resposta = colecao_respostas.find_one({"_id": ObjectId(id)})
     if not resposta:
@@ -21,7 +21,7 @@ async def buscar_resposta(id: str):
     return individual_serial(resposta)
 
 # ROTA QUE DELETA UMA RESPOSTA PELO ID
-@router.delete("/{id}")
+@router.delete("/deleta-resposta")
 async def deleta_resposta(id: str):
     resultado = colecao_respostas.find_one_and_delete({"_id": ObjectId(id)})
     if not resultado:
@@ -31,7 +31,7 @@ async def deleta_resposta(id: str):
     }
 
 # ROTA QUE RETORNA SE AS ATIVIDADES ESTAO CORRETAS
-@router.post("/")
+@router.post("/retorna-resposta")
 async def enviar_resposta(resposta: Resposta):
     atividade = colecao_atividades.find_one({"_id": ObjectId(resposta.atividade_id)})
     if not atividade:
@@ -66,6 +66,7 @@ async def enviar_resposta(resposta: Resposta):
     
     resultado = colecao_respostas.insert_one(dados_resposta)
     return {
-        "id": str(resultado.inserted_id), 
-        "correta": correta
+        "id": str(resultado.inserted_id),
+        "correta": correta,
+        "resposta_correta": resposta_correta
     }
