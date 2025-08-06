@@ -8,5 +8,7 @@ client = MongoClient("mongodb+srv://raphaluvi:MMaX9NhzNOj2Ka1j@cluster0.dvam31v.
 db = client.cria_kids
 # Acessa (ou cria, caso não exista) o banco de dados chamado "cria_kids".
 
-colecao_respostas = db['respostas']
-colecao_atividades = db["atividades"]
+colecao_respostas = db['resposta']
+colecao_atividades = db["atividade"]
+colecao_responsaveis = db['responsavel']
+colecao_criancas = db['crianca']

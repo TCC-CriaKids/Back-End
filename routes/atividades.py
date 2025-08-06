@@ -44,7 +44,11 @@ palavras = [
     "computador", "celular", "telefone", "televisão", "rádio", "livro", "caderno", "caneta", "lápis", "borracha",
     "escola", "professor", "aluno", "amigo", "familia", "trabalho", "cidade", "campo", "carro", "ônibus"
 ]
-tipos_validos = {"primeira_letra", "ultima_letra", "quantidade_letras"}
+tipos_validos = {
+    "primeira_letra", 
+    "ultima_letra", 
+    "quantidade_letras"
+}
 
 # ROTA QUE CRIA A ATIVIDADE (ESCOLHE A PALAVRA ALEATORIAMENTE)
 @router.post("/cria-atividade")
