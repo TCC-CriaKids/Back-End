@@ -4,6 +4,7 @@ from models.crianca import Crianca
 from config.database import colecao_responsaveis, colecao_criancas
 from schema.schemas import individual_serial, list_serial
 from bson import ObjectId
+import bcrypt
 
 router = APIRouter()
 
@@ -36,6 +37,32 @@ async def deletar_responsavel(id: str):
         "mensagem": "Responsável deletado com sucesso"
     }
 
+@router.post("/cadastra-responsavel")
+async def cadastrar_responsavel(responsavel: Responsavel):
+    # Verifica se já existe CPF cadastrado
+    if colecao_responsaveis.find_one({"cpf": responsavel.cpf}):
+        raise HTTPException(status_code=400, detail="CPF já cadastrado.")
+
+    # Criptografa a senha
+    senha_hash = bcrypt.hashpw(responsavel.senha.encode('utf-8'), bcrypt.gensalt())
+    
+    # Cria dicionário dos dados para inserir, substituindo a senha pela hash
+    dados_responsavel = responsavel.model_dump()
+    dados_responsavel["senha"] = senha_hash.decode('utf-8')
+
+    # Insere no banco
+    resultado = colecao_responsaveis.insert_one(dados_responsavel)
+    novo_responsavel = colecao_responsaveis.find_one({"_id": resultado.inserted_id})
+
+    # Serializa, omitindo a senha antes de retornar
+    dados_serializados = individual_serial(novo_responsavel)
+    dados_serializados.pop("senha", None)  # Remove senha da resposta
+
+    return {
+        "mensagem": "Responsável cadastrado com sucesso!",
+        "dados": dados_serializados
+    }
+    
 
 ### CRIANÇA
 

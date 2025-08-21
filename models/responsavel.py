@@ -1,8 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
+from typing import Annotated
 
 class Responsavel(BaseModel):
-    cpf: str
+    cpf: Annotated[str, Field(min_length=11, max_length=11, pattern=r'^\d{11}$')]
     nome: str
-    email: str
-    telefone: int
+    email: EmailStr
+    telefone: Annotated[str, Field(pattern=r'^\d{10,15}$')]
     senha: str
