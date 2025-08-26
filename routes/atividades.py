@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.atividade import Atividade
+from models.Atividade import Atividade
 from config.database import colecao_atividades
 from schema.schemas import individual_serial, list_serial
 from bson import ObjectId

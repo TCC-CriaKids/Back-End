@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.resposta import Resposta
+from models.Resposta import Resposta
 from config.database import colecao_respostas, colecao_atividades
 from schema.schemas import individual_serial, list_serial
 from bson import ObjectId
