@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Path
 from models.Responsavel import Responsavel
 from models.Crianca import Crianca
+from models.CriancaUpdate import CriancaUpdate
 from models.ResponsavelUpdate import ResponsavelUpdate
 from config.database import colecao_responsaveis, colecao_criancas
 from schema.schemas import individual_serial, list_serial
@@ -55,7 +56,7 @@ async def cadastrar_responsavel(responsavel: Responsavel):
     resultado = colecao_responsaveis.insert_one(dados_responsavel)
     novo_responsavel = colecao_responsaveis.find_one({"_id": resultado.inserted_id})
 
-    # Serializa, omitindo a senha antes de retornar
+    # Serializa, nao exibindo a senha antes de retornar
     dados_serializados = individual_serial(novo_responsavel)
     dados_serializados.pop("senha", None)  # Remove senha da resposta
 
@@ -141,17 +142,71 @@ async def cadastrar_crianca(crianca: Crianca):
     if colecao_criancas.find_one({"cpf": crianca.cpf}):
         raise HTTPException(status_code=400, detail="CPF já cadastrado.")
     
-    # Cria dicionário dos dados para inserir
+    # Verifica se o responsável existe
+    responsavel = colecao_responsaveis.find_one({"_id": ObjectId(crianca.responsavel_id)})
+    if not responsavel:
+        raise HTTPException(status_code=404, detail="Responsável não encontrado.")
+    
+    # Criptografa a senha
+    senha_hash = bcrypt.hashpw(crianca.senha.encode('utf-8'), bcrypt.gensalt())
+    
+    # Cria dicionário dos dados para inserir, substituindo a senha pela hash
     dados_crianca = crianca.model_dump()
+    dados_crianca["senha"] = senha_hash.decode('utf-8')
 
     # Insere no banco
     resultado = colecao_criancas.insert_one(dados_crianca)
     nova_crianca = colecao_criancas.find_one({"_id": resultado.inserted_id})
 
-    # Serializando os dados
+    # Serializando os dados sem a senha
     dados_serializados = individual_serial(nova_crianca)
+    dados_serializados.pop("senha", None)
 
     return {
         "mensagem": "Criança cadastrada com sucesso!",
+        "dados": dados_serializados
+    }
+
+@router.put("/crianca/{id}")
+async def atualizar_crianca(
+    id: str = Path(..., description="ID da criança a ser atualizada"),
+    dados: CriancaUpdate = ...
+):
+    crianca = colecao_criancas.find_one({"_id": ObjectId(id)})
+    if not crianca:
+        raise HTTPException(status_code=404, detail="Criança não encontrada.")
+
+    dados_dict = dados.model_dump(exclude_unset=True)
+
+    # Troca de senha
+    if 'senha_atual' in dados_dict or 'senha_nova' in dados_dict:
+        if not dados_dict.get('senha_atual') or not dados_dict.get('senha_nova'):
+            raise HTTPException(status_code=400, detail="Informe senha atual e nova senha para alteração.")
+        
+        if not bcrypt.checkpw(dados_dict['senha_atual'].encode('utf-8'), crianca['senha'].encode('utf-8')):
+            raise HTTPException(status_code=400, detail="Senha atual incorreta.")
+
+        nova_senha_hash = bcrypt.hashpw(dados_dict['senha_nova'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        dados_dict['senha'] = nova_senha_hash
+
+        dados_dict.pop('senha_atual')
+        dados_dict.pop('senha_nova')
+
+    # Protege campos que não devem ser alterados
+    dados_dict.pop('cpf', None)
+    dados_dict.pop('responsavel_id', None)
+    dados_dict.pop('progresso', None)
+
+    if not dados_dict:
+        raise HTTPException(status_code=400, detail="Nenhum dado para atualizar.")
+
+    colecao_criancas.update_one({"_id": ObjectId(id)}, {"$set": dados_dict})
+
+    crianca_atualizada = colecao_criancas.find_one({"_id": ObjectId(id)})
+    dados_serializados = individual_serial(crianca_atualizada)
+    dados_serializados.pop("senha", None)
+
+    return {
+        "mensagem": "Dados da criança atualizados com sucesso!",
         "dados": dados_serializados
     }
