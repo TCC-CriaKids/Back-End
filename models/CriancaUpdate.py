@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Annotated, List, Optional
-from models.Atividade import Atividade  # model ja existente
+from typing import Optional
 
 class CriancaUpdate(BaseModel):
     nome: Optional[str] = Field(..., example="Roberto")
