@@ -1,6 +1,6 @@
 from fastapi import FastAPI  # Importa a classe FastAPI
 # from routes.route import router  # Importa as rotas definidas em route.py
-from routes import atividades, responsaveis, respostas, auth, status, criancas
+from routes import atividades, responsaveis, respostas, auth, status, criancas, ollama
 
 app = FastAPI()  # Cria a aplicação FastAPI
 
@@ -10,3 +10,4 @@ app.include_router(respostas.router, tags=["Respostas"])
 app.include_router(responsaveis.router, tags=["Responsáveis"])
 app.include_router(criancas.router, tags=["Crianças"])
 app.include_router(auth.router, tags=["Autenticação"])
+app.include_router(ollama.router, prefix="/ollama", tags=["Ollama"])
