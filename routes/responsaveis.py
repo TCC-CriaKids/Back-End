@@ -12,7 +12,7 @@ router = APIRouter()
 ### RESPONSÁVEL
 
 # ROTA QUE RETORNA TODOS OS RESPONSAVEIS
-@router.get("/todos-responsaveis")
+@router.get("/todos_responsaveis")
 async def listar_responsaveis():
     responsaveis = list_serial(colecao_responsaveis.find())
     if not responsaveis:
@@ -20,16 +20,20 @@ async def listar_responsaveis():
     return responsaveis
 
 # ROTA QUE RETORNA RESPONSAVEL PELO ID
-@router.get("/buscar-responsavel")
-async def buscar_responsavel(id: str):
+@router.get("/buscar_responsavel/{id}")
+async def buscar_responsavel(
+    id: str = Path(..., description="ID do responsável a ser buscado") 
+):
     responsavel = colecao_responsaveis.find_one({"_id": ObjectId(id)})
     if not responsavel:
         raise HTTPException(status_code=404, detail="Responsável não encontrado")
     return individual_serial(responsavel)
 
 # ROTA QUE DELETA RESPONSÁVEL PELO ID
-@router.delete("/deleta-responsavel")
-async def deletar_responsavel(id: str):
+@router.delete("/deleta_responsavel/{id}")
+async def deletar_responsavel(
+    id: str = Path(..., description="ID do responsável a ser deletado") 
+):
     resultado = colecao_responsaveis.find_one_and_delete({"_id": ObjectId(id)})
     if not resultado:
         raise HTTPException(status_code=404, detail="Responsável não encontrado para deletar")
@@ -37,7 +41,7 @@ async def deletar_responsavel(id: str):
         "mensagem": "Responsável deletado com sucesso"
     }
 
-@router.post("/cadastra-responsavel")
+@router.post("/cadastra_responsavel")
 async def cadastrar_responsavel(responsavel: Responsavel):
     # Verifica se já existe CPF cadastrado
     if colecao_responsaveis.find_one({"cpf": responsavel.cpf}):
@@ -63,7 +67,7 @@ async def cadastrar_responsavel(responsavel: Responsavel):
         "dados": dados_serializados
     }
 
-@router.put("/responsavel/{id}")
+@router.put("/atualiza_responsavel/{id}")
 async def atualizar_responsavel(
     id: str = Path(..., description="ID do responsável a ser atualizado"),
     dados: ResponsavelUpdate = ...

@@ -9,7 +9,7 @@ import bcrypt
 router = APIRouter()
 
 # ROTA QUE RETORNA TODAS AS CRIANÇAS
-@router.get("/todas-criancas")
+@router.get("/todas_criancas")
 async def listar_criancas():
     criancas = list_serial(colecao_criancas.find())
     if not criancas:
@@ -17,24 +17,26 @@ async def listar_criancas():
     return criancas
 
 # ROTA QUE RETORNA CRIANÇA PELO ID
-@router.get("/buscar-crianca")
-async def buscar_crianca(id: str):
+@router.get("/buscar_crianca/{id}")
+async def buscar_crianca(
+    id: str = Path(..., description="ID da criança a ser buscada") 
+):
     crianca = colecao_criancas.find_one({"_id": ObjectId(id)})
     if not crianca:
         raise HTTPException(status_code=404, detail="Criança não encontrada")
     return individual_serial(crianca)
 
-# ROTA QUE DELETA CRIANÇA PELO ID
-@router.delete("/deleta-crianca")
-async def deletar_crianca(id: str):
-    crianca = colecao_criancas.find_one_and_delete({"_id": ObjectId(id)})
+# ROTA QUE DELETA CRIANÇA PELO ID 
+@router.delete("/deleta_crianca/{id}") 
+async def deletar_crianca(
+    id: str = Path(..., description="ID da criança a ser deletada") 
+): 
+    crianca = colecao_criancas.find_one_and_delete({"_id": ObjectId(id)}) 
     if not crianca: 
-        raise HTTPException(status_code=404, detail="Criança não encontrada para deletar")
-    return {
-        "mensagem": "Criança deletada com sucesso"
-    }
+        raise HTTPException(status_code=404, detail="Criança não encontrada para deletar") 
+    return { "mensagem": "Criança deletada com sucesso" }
 
-@router.post("/cadastra-crianca")
+@router.post("/cadastra_crianca")
 async def cadastrar_crianca(crianca: Crianca):
     # Verifica se já existe CPF cadastrado
     if colecao_criancas.find_one({"cpf": crianca.cpf}):
@@ -65,7 +67,7 @@ async def cadastrar_crianca(crianca: Crianca):
         "dados": dados_serializados
     }
 
-@router.put("/crianca/{id}")
+@router.put("/atualiza_crianca/{id}")
 async def atualizar_crianca(
     id: str = Path(..., description="ID da criança a ser atualizada"),
     dados: CriancaUpdate = ...

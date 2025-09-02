@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Annotated, List, Optional
-from models.Atividade import Atividade  # model ja existente
+from typing import Annotated
 
 class Crianca(BaseModel):
     cpf: Annotated[str, Field(min_length=11, max_length=11, pattern=r'^\d{11}$')]
@@ -9,4 +8,3 @@ class Crianca(BaseModel):
     tipo_escola: str = Field(..., example="publica")
     senha: Annotated[str, Field(min_length=6)]  # senha para login da criança
     responsavel_id: str
-    progresso: Optional[List[Atividade]] = Field(default_factory=list)  # lista de atividades feitas

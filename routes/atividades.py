@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 from models.Atividade import Atividade
 from config.database import colecao_atividades
 from schema.schemas import individual_serial, list_serial
@@ -8,22 +8,26 @@ import random
 router = APIRouter()
 
 # ROTA QUE RETORNA TODAS AS ATIVIDADES
-@router.get("/todas-atividades")
+@router.get("/todas_atividades")
 async def listar_atividades():
     atividades = list_serial(colecao_atividades.find())
     return atividades
 
 # ROTA QUE RETORNA ATIVIDADE PELO ID
-@router.get("/buscar-atividade")
-async def buscar_atividade(id: str):
+@router.get("/buscar_atividade/{id}")
+async def buscar_atividade(
+    id: str = Path(..., description="ID da atividade a ser buscada") 
+):
     atividade = colecao_atividades.find_one({"_id": ObjectId(id)})
     if not atividade:
         raise HTTPException(status_code=404, detail="Atividade não encontrada")
     return individual_serial(atividade)
 
 # ROTA QUE DELETA UMA ATIVIDADE PELO ID
-@router.delete("/deleta-atividade")
-async def deleta_atividade(id: str):
+@router.delete("/deleta_atividade/{id}")
+async def deleta_atividade(
+    id: str = Path(..., description="ID da atividade a ser deletada") 
+):
     resultado = colecao_atividades.find_one_and_delete({"_id": ObjectId(id)})
     if not resultado:
         raise HTTPException(status_code=404, detail="Atividade não encontrada para deletar")
@@ -51,7 +55,7 @@ tipos_validos = {
 }
 
 # ROTA QUE CRIA A ATIVIDADE (ESCOLHE A PALAVRA ALEATORIAMENTE)
-@router.post("/cria-atividade")
+@router.post("/cria_atividade")
 async def criar_atividade(atividade: Atividade):
     if atividade.tipo not in tipos_validos:
         raise HTTPException(status_code=400, detail="Tipo de atividade inválido")
