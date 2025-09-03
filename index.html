@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo de Atividades</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f9f9f9;
+      color: #333;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    header {
+      background: #6200ea;
+      color: white;
+      width: 100%;
+      text-align: center;
+      padding: 1rem 0;
+    }
+    main {
+      margin-top: 2rem;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+    }
+    button {
+      background: #6200ea; color: white;
+      padding: 0.5rem 1rem; margin: 1rem 0;
+      border: none; border-radius: 5px;
+      cursor: pointer; font-size: 1rem;
+    }
+    button:hover { background: #3700b3; }
+    input {
+      padding: 0.5rem; width: 100%; max-width: 300px;
+      border: 1px solid #ccc; border-radius: 5px; margin: 0.5rem 0;
+    }
+    .feedback {
+      margin-top: 1rem; font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Jogo de Atividades</h1>
+  </header>
+  <main>
+    <div id="inicio">
+      <button onclick="novaAtividade()">Iniciar Atividade</button>
+    </div>
+    <div id="jogo" style="display:none;">
+      <p id="descricao"></p>
+      <h2 id="palavra"></h2>
+      <input type="text" id="resposta" placeholder="Digite sua resposta">
+      <button onclick="verificarResposta()">Verificar</button>
+      <p class="feedback" id="feedback"></p>
+      <button onclick="novaAtividade()">Próxima Atividade</button>
+    </div>
+  </main>
+
+  <script>
+    const API = "http://127.0.0.1:8000/api";
+    let atividadeAtual = null;
+
+    async function novaAtividade() {
+    const tipos = ["primeira_letra", "ultima_letra", "quantidade_letras"];
+    const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+
+    // Adicione um nível fixo ou aleatório
+    const niveis = ["facil", "medio", "dificil"];
+    const nivel = niveis[Math.floor(Math.random() * niveis.length)];
+
+    const res = await fetch(`${API}/cria_atividade`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo, nivel })
+    });
+
+    if (!res.ok) {
+        const erro = await res.text();
+        alert("Erro ao criar atividade: " + erro);
+        return;
+    }
+
+    atividadeAtual = await res.json();
+
+    document.getElementById("inicio").style.display = "none";
+    document.getElementById("jogo").style.display = "block";
+
+    let instrucao = "";
+    if (tipo === "primeira_letra") instrucao = "Qual é a primeira letra desta palavra?";
+    if (tipo === "ultima_letra") instrucao = "Qual é a última letra desta palavra?";
+    if (tipo === "quantidade_letras") instrucao = "Quantas letras tem esta palavra?";
+
+    document.getElementById("descricao").innerText = instrucao;
+    document.getElementById("palavra").innerText = atividadeAtual.palavra;
+    document.getElementById("feedback").innerText = "";
+    document.getElementById("resposta").value = "";
+}
+
+    function verificarResposta() {
+      const resposta = document.getElementById("resposta").value.trim().toLowerCase();
+      const palavra = atividadeAtual.palavra.trim().toLowerCase();
+      const tipo = atividadeAtual.tipo;
+      let correta = false;
+
+      if (tipo === "primeira_letra" && resposta === palavra[0]){
+        correta = true;
+      }
+      if (tipo === "ultima_letra" && resposta === palavra[palavra.length-1]){
+        correta = true;
+      }
+      if (tipo === "quantidade_letras" && parseInt(resposta) === palavra.length){
+        correta = true;
+      }
+
+      const feedback = document.getElementById("feedback");
+      if (correta) {
+        feedback.style.color = "green";
+        feedback.innerText = "✅ Parabéns! Você acertou!";
+      } else {
+        feedback.style.color = "red";
+        feedback.innerText = "❌ Ops! Resposta errada.";
+      }
+    }
+  </script>
+</body>
+</html>
