@@ -1,17 +1,22 @@
 from fastapi import APIRouter, HTTPException
 from config.database import colecao_responsaveis
 from schema.schemas import individual_serial
+from pydantic import BaseModel
 import bcrypt
 
 router = APIRouter()
 
-@router.post("/login")
-async def login(email: str, senha: str):
-    responsavel = colecao_responsaveis.find_one({"email": email})
+class LoginResponsavel(BaseModel):
+    email: str
+    senha: str
+
+@router.post("/login_responsavel")
+async def login(dados: LoginResponsavel):  
+    responsavel = colecao_responsaveis.find_one({"email": dados.email})
     if not responsavel:
         raise HTTPException(status_code=400, detail="Email ou senha incorretos")
 
-    if not bcrypt.checkpw(senha.encode('utf-8'), responsavel['senha'].encode('utf-8')):
+    if not bcrypt.checkpw(dados.senha.encode('utf-8'), responsavel['senha'].encode('utf-8')):
         raise HTTPException(status_code=400, detail="Email ou senha incorretos")
 
     # Remove a senha antes de retornar

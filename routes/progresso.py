@@ -1,7 +1,7 @@
 # routes/progresso.py
 from fastapi import APIRouter, HTTPException, Depends, Path
 from models.Progresso import Progresso
-from config.database import colecao_progresso
+from config.database import colecao_progresso, colecao_atividades
 from schema.schemas import individual_serial, list_serial
 from bson import ObjectId
 from datetime import datetime
@@ -22,18 +22,19 @@ async def progresso_por_nivel(crianca_id: str, nivel: int):
     )
     return progresso
 
-# ROTA QUE INSERE PROGRESSO
-@router.post("/progresso")
-async def adicionar_progresso(progresso: Progresso):
-    # Preenche a data se não vier
-    if not progresso.data:
-        progresso.data = datetime.utcnow()
+# ROTA DE TESTE: criação manual de progresso
+# No uso normal, o progresso é gerado automaticamente ao responder atividades
+# @router.post("/progresso")
+# async def adicionar_progresso(progresso: Progresso):
+#     # Preenche a data se não vier
+#     if not progresso.data:
+#         progresso.data = datetime.utcnow()
     
-    resultado = colecao_progresso.insert_one(progresso.model_dump())
-    return {
-        "id": str(resultado.inserted_id),
-        "mensagem": "Progresso registrado com sucesso!"
-    }
+#     resultado = colecao_progresso.insert_one(progresso.model_dump())
+#     return {
+#         "id": str(resultado.inserted_id),
+#         "mensagem": "Progresso registrado com sucesso!"
+#     }
 
 # ROTA QUE DELETA PROGRESSO PELO ID
 @router.delete("/progresso/{id}")

@@ -57,11 +57,14 @@ def validar_resposta(atividade: dict, resposta_texto: str):
 
 # ROTA QUE RETORNA SE AS ATIVIDADES ESTAO CORRETAS
 # Ainda precisa arrumar isso - Token ou sessao
-def get_crianca_id():
-    return "ID_DA_CRIANCA_LOGADA"
+# def get_crianca_id():
+#     return "ID_DA_CRIANCA_LOGADA"
 
 @router.post("/responder")
-async def enviar_resposta(resposta: Resposta, crianca_id: str = Depends(get_crianca_id)):
+async def enviar_resposta(resposta: Resposta):
+    # Pega o ID_CRIANCA do localStorage do Front-End
+    crianca_id = resposta.crianca_id
+    
     # Busca a atividade
     atividade = colecao_atividades.find_one({"_id": ObjectId(resposta.atividade_id)})
     if not atividade:
@@ -75,7 +78,6 @@ async def enviar_resposta(resposta: Resposta, crianca_id: str = Depends(get_cria
     dados_resposta.update({
         "correta": correta,
         "resposta_correta": resposta_correta,
-        "crianca_id": crianca_id,
         "data": datetime.now(timezone.utc)
     })
     resultado = colecao_respostas.insert_one(dados_resposta)
