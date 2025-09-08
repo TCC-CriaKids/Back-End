@@ -10,7 +10,7 @@ class LoginResponsavel(BaseModel):
     email: str
     senha: str
 
-@router.post("/login_responsavel")
+@router.post("/login")
 async def login(dados: LoginResponsavel):  
     responsavel = colecao_responsaveis.find_one({"email": dados.email})
     if not responsavel:

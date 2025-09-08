@@ -4,7 +4,6 @@ from routes.api import api_router
 
 app = FastAPI(title="CRIA Kids")
 
-# 🔥 Habilitar CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Em produção, troque "*" pelo domínio do seu front
@@ -14,4 +13,4 @@ app.add_middleware(
 )
 
 # Rotas com prefixo /api
-app.include_router(api_router, prefix="/api")
+app.include_router(api_router)

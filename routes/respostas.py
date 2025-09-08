@@ -55,11 +55,7 @@ def validar_resposta(atividade: dict, resposta_texto: str):
         raise HTTPException(status_code=400, detail="Tipo de atividade inválido ou não implementado")
     return correta, resposta_correta
 
-# ROTA QUE RETORNA SE AS ATIVIDADES ESTAO CORRETAS
-# Ainda precisa arrumar isso - Token ou sessao
-# def get_crianca_id():
-#     return "ID_DA_CRIANCA_LOGADA"
-
+# ROTA PARA RESPONDER ATIVIDADES
 @router.post("/responder")
 async def enviar_resposta(resposta: Resposta):
     # Pega o ID_CRIANCA do localStorage do Front-End

@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Path
 from models.Responsavel import Responsavel
 from models.ResponsavelUpdate import ResponsavelUpdate
-from config.database import colecao_responsaveis
+from config.database import colecao_responsaveis, colecao_criancas
 from schema.schemas import individual_serial, list_serial
 from bson import ObjectId
 import bcrypt
+from validate_docbr import CPF
 
 router = APIRouter()
 
@@ -46,6 +47,10 @@ async def cadastrar_responsavel(responsavel: Responsavel):
     # Verifica se já existe CPF cadastrado
     if colecao_responsaveis.find_one({"cpf": responsavel.cpf}):
         raise HTTPException(status_code=400, detail="CPF já cadastrado.")
+
+    # Valida CPF real - DEIXA COMENTADO PARA TESTES
+    # if not CPF().validate(responsavel.cpf):
+    #     raise HTTPException(status_code=400, detail="CPF inválido.")
 
     # Criptografa a senha
     senha_hash = bcrypt.hashpw(responsavel.senha.encode('utf-8'), bcrypt.gensalt())
@@ -107,4 +112,18 @@ async def atualizar_responsavel(
     return {
         "mensagem": "Dados do responsável atualizados com sucesso!",
         "dados": dados_serializados
+    }
+
+# ROTA QUE RETORNA AS CRIANÇAS DO RESPONSAVEL - SERVE PARA A PAGINA DE ESCOLHA DA CRIANCA
+@router.get("/buscar_criancas/{responsavel_id}")
+async def buscar_criancas(responsavel_id: str = Path(..., description="ID do responsável")):
+    # Busca todas as crianças vinculadas ao responsável
+    criancas = list_serial(colecao_criancas.find({"responsavel_id": responsavel_id}))
+    
+    if not criancas:
+        raise HTTPException(status_code=404, detail="Nenhuma criança encontrada para este responsável")
+    
+    return {
+        "mensagem": f"Foram encontradas {len(criancas)} criança(s).",
+        "dados": criancas
     }
