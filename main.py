@@ -4,9 +4,14 @@ from routes.api import api_router
 
 app = FastAPI(title="CRIA Kids")
 
+origins = [
+    "https://cria-kids-tcc.vercel.app",
+    "http://127.0.0.1:5500"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Em produção, troque "*" pelo domínio do seu front
+    allow_origins=origins, 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
