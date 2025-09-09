@@ -3,4 +3,6 @@ from pydantic import BaseModel
 
 class Atividade(BaseModel):
     tipo: str
-    nivel: str
+    nivel: str = 1
+    palavra: str = None # preenchido aleatoriamente na rota
+    historia: str # princesas, heroi, fada, monstro

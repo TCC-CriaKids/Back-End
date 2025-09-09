@@ -40,20 +40,26 @@ async def deleta_resposta(
 def validar_resposta(atividade: dict, resposta_texto: str):
     palavra = atividade.get("palavra", "").lower()
     tipo = atividade.get("tipo", "")
+
     if tipo == "quantidade_letras":
         if not resposta_texto.isdigit():
             raise HTTPException(status_code=400, detail="A resposta deve ser um número inteiro")
         correta = int(resposta_texto) == len(palavra)
         resposta_correta = len(palavra)
     elif tipo == "primeira_letra":
+        if not resposta_texto.isalpha():
+            raise HTTPException(status_code=400, detail="A resposta deve ser uma letra")
         correta = resposta_texto.lower() == palavra[0]
         resposta_correta = palavra[0]
     elif tipo == "ultima_letra":
+        if not resposta_texto.isalpha():
+            raise HTTPException(status_code=400, detail="A resposta deve ser uma letra")
         correta = resposta_texto.lower() == palavra[-1]
         resposta_correta = palavra[-1]
     else:
         raise HTTPException(status_code=400, detail="Tipo de atividade inválido ou não implementado")
     return correta, resposta_correta
+
 
 # ROTA PARA RESPONDER ATIVIDADES
 @router.post("/responder")

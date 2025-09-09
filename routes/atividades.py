@@ -48,6 +48,27 @@ palavras = [
     "computador", "celular", "telefone", "televisão", "rádio", "livro", "caderno", "caneta", "lápis", "borracha",
     "escola", "professor", "aluno", "amigo", "familia", "trabalho", "cidade", "campo", "carro", "ônibus"
 ]
+
+palavras_por_historia = {
+    "princesas": [
+        "cinderela", "branca", "rapunzel", "ariel", "bela", "mulan",
+        "tiana", "elsa", "anna", "jasmine", "aurora", "merida"
+    ],
+    "herois": [
+        "spiderman", "batman", "superman", "thor", "hulk", "ironman",
+        "flash", "aquaman", "wonderwoman", "capitaoamerica", "antman", "blackwidow"
+    ],
+    "fadas": [
+        "sininho", "fada", "duende", "pixie", "lumin", "estrela", "florzinha",
+        "lirio", "gardinia", "borboleta", "alegria", "melodia"
+    ],
+    "monstros": [
+        "ogro", "dragao", "troll", "zumbi", "vampiro", "frankenstein",
+        "lobisomem", "goblin", "esqueleto", "fantasma", "ghoul", "golem"
+    ]
+}
+
+
 tipos_validos = {
     "primeira_letra", 
     "ultima_letra", 
@@ -60,7 +81,9 @@ async def criar_atividade(atividade: Atividade):
     if atividade.tipo not in tipos_validos:
         raise HTTPException(status_code=400, detail="Tipo de atividade inválido")
     
-    palavra_escolhida = random.choice(palavras)
+     # Escolhe a lista de palavras pelo tipo de história, padrão para lista geral se não houver
+    lista_palavras = palavras_por_historia.get(atividade.historia, list(palavras_por_historia.values())[0])
+    palavra_escolhida = random.choice(lista_palavras)
     
     dados_atividade = atividade.model_dump()
     dados_atividade["palavra"] = palavra_escolhida
